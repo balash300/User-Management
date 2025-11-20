@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for user-management-300 on 2025-11-20T21:41:50Z
+# fly.toml app configuration file generated for user-management-301 on 2025-11-20T22:09:52Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'user-management-300'
+app = 'user-management-301'
 primary_region = 'cdg'
 
 [build]
