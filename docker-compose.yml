@@ -1,8 +1,7 @@
 services:
-
-  db:
-    platform: linux/64
-#    image: postgres:15-alpine
+  postgres-db:
+    platform: linux/arm64
+    image: postgres:15-alpine
     container_name: postgres-db
     environment:
       POSTGRES_DB: usermanagement
@@ -13,8 +12,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+
   user-service:
-    platform: linux/64
+    platform: linux/arm64
     build:
       context: .
       dockerfile: Dockerfile
