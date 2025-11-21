@@ -6,6 +6,9 @@ import az.company.usermanagement.dto.response.UserResponse;
 import az.company.usermanagement.dto.request.UserUpdateRequest;
 import az.company.usermanagement.entity.Users;
 import az.company.usermanagement.exception.UserNotFoundException;
+import az.company.usermanagement.kafka.event.UserCreatedEvent;
+import az.company.usermanagement.kafka.producer.UserEventProducer;
+import az.company.usermanagement.mapper.UserEventMapper;
 import az.company.usermanagement.mapper.UserMapper;
 import az.company.usermanagement.repository.UserRepository;
 import az.company.usermanagement.service.UserService;
@@ -26,6 +29,8 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final UserEventMapper userEventMapper;
+    private final UserEventProducer userEventProducer;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
@@ -37,8 +42,12 @@ public class UserServiceImpl implements UserService {
         String encodedPassword = passwordEncoder.encode(request.getPassword());
         user.setPassword(encodedPassword);
 
-        userRepository.save(user);
+        Users savedUser = userRepository.save(user);
         log.info("User saved successfully with id: {}", user.getId());
+
+        UserCreatedEvent event = userEventMapper.toUserCreatedEvent(savedUser);
+        userEventProducer.sendUserCreatedEvent(event);
+        log.info("UserCreatedEvent sent successfully for user with id: {}", savedUser.getId());
 
         return userMapper.toResponse(user);
     }

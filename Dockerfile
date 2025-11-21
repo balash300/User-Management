@@ -1,9 +1,21 @@
-FROM gradle:8.7-jdk21-alpine AS BUILDER
+# ---- Build Stage ----
+FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
-COPY . .
-RUN gradle clean build -x test
 
-FROM eclipse-temurin:21-jre-alpine
+COPY gradlew .
+COPY gradle ./gradle
+COPY build.gradle .
+COPY settings.gradle .
+COPY src ./src
+
+# Gradle build
+RUN ./gradlew bootJar --no-daemon
+
+# ---- Run Stage ----
+FROM eclipse-temurin:21-jdk-alpine
 WORKDIR /app
-COPY --from=BUILDER /app/build/libs/*.jar app.jar
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+COPY --from=build /app/build/libs/*.jar app.jar
+
+# Uygulamayı çalıştır
+ENTRYPOINT ["java","-jar","/app/app.jar"]
